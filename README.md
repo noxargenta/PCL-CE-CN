@@ -4,6 +4,7 @@
 > 本分支恢复中国大陆地区的 Minecraft 下载、安装、整合包安装、修复与启动时缺失文件补全功能，保留原有下载源设置。
 > [下载本分支发行版](https://github.com/noxargenta/PCL-CE-CN/releases/latest)。本分支的问题请提交到本仓库。
 > 本分支采用手动更新，更新页面的下载按钮会打开本仓库发行页，避免被上游版本覆盖。
+> 本分支发行版仅提供 Windows x64 单文件 `.exe`，包含 .NET 运行时，下载后双击即可运行。
 
 <div align="center">
 
