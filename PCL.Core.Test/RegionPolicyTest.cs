@@ -6,12 +6,18 @@ namespace PCL.Core.Test;
 [TestClass]
 public class RegionPolicyTest
 {
-    [TestMethod]
-    public void ChinaTimeZoneAndChinaRegionRestrict()
+    [DataTestMethod]
+    [DataRow("CN", "China Standard Time")]
+    [DataRow("CN", "Asia/Shanghai")]
+    [DataRow("CN", "PRC")]
+    [DataRow("156", "China Standard Time")]
+    [DataRow("156", "Asia/Shanghai")]
+    [DataRow("cn", "asia/shanghai")]
+    public void ChinaTimeZoneAndChinaRegionDoNotRestrict(string geo, string timeZone)
     {
-        var result = RegionPolicy.Evaluate(Signals("CN", "China Standard Time"));
+        var result = RegionPolicy.Evaluate(Signals(geo, timeZone));
         Assert.AreEqual(RegionClassification.Mainland, result.Classification);
-        Assert.IsTrue(result.IsRestricted);
+        Assert.IsFalse(result.IsRestricted);
     }
 
     [TestMethod]

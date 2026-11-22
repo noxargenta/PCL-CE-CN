@@ -19,7 +19,8 @@ public sealed record RegionSignals(
 
 public sealed record RegionAssessment(RegionClassification Classification, string Reason)
 {
-    public bool IsRestricted => Classification == RegionClassification.Mainland;
+    // PCL CE CN 保留地区识别，但所有地区均可使用下载、安装与文件补全功能。
+    public bool IsRestricted => false;
 }
 
 public static class RegionPolicy
@@ -36,9 +37,9 @@ public static class RegionPolicy
     {
         ArgumentNullException.ThrowIfNull(signals);
 
-        // 仅在“时区为中国大陆”且“设备地区为中国大陆”时启用限制。
+        // 仅在“时区为中国大陆”且“设备地区为中国大陆”时识别为中国大陆。
         // 设备地区取系统“国家或地区”设置，而不是 OOBE 时写入的设备安装地区。
-        // 任一项无法确认或不为中国大陆，均不限制。
+        // 地区分类仅用于识别，不限制功能。
         var chinaTimeZone = signals is { TimeZoneAvailable: true, TimeZoneId: not null }
             && _ChinaTimeZones.Contains(signals.TimeZoneId);
         var chinaRegion = signals.GeoNameAvailable && _IsChinaGeoName(signals.GeoName);

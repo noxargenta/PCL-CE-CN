@@ -1,5 +1,9 @@
 **简体中文** | [English](README-EN.md) | [繁體中文](README-ZH_TW.md)
 
+> **PCL CE CN** 是第三方基于 PCL CE 独立修改的分支，由本仓库维护。
+> 本分支恢复中国大陆地区的 Minecraft 下载、安装、整合包安装、修复与启动时缺失文件补全功能，保留原有下载源设置。
+> [下载本分支发行版](https://github.com/noxargenta/PCL-CE-CN/releases/latest)。本分支的问题请提交到本仓库。
+
 <div align="center">
 
 <img src="PCL.Launcher/Assets/Images/icon.svg" alt="Logo" width="80" height="80">
