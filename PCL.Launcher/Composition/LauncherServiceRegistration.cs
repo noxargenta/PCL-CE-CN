@@ -43,11 +43,8 @@ public static class LauncherServiceRegistration
         services.AddLauncherUi();
         UiServiceRegistration.Validate(services);
 
-        services.AddSingleton<IUpdatePolicy>(_ => kind switch
-        {
-            PlatformKind.Windows => new WindowsUpdatePolicy(),
-            _ => new ManualUpdatePolicy()
-        });
+        // CN 分支从本仓库手动更新，避免被上游发行版覆盖。
+        services.AddSingleton<IUpdatePolicy, ManualUpdatePolicy>();
         services.AddSingleton<IPlatformFontProvider>(_ => kind switch
         {
             PlatformKind.Windows => new WindowsFontProvider(),

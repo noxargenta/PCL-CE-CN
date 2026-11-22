@@ -293,8 +293,7 @@ public partial class PageSetupUpdateViewModel : ViewModelBase
     public static void OpenReleasesPage()
     {
         Basics.OpenPath(
-            "https://github.com/PCL-Community/PCL2-CE/releases/v"
-            + LauncherCommon.VersionBaseName);
+            "https://github.com/noxargenta/PCL-CE-CN/releases/latest");
     }
 
     /// <summary>切换更新通道；返回 false 表示用户取消，调用方需要把下拉恢复原值。</summary>
