@@ -109,10 +109,17 @@ jobs:
             Start-Sleep -Seconds 15
             $process.Refresh()
             if ($process.HasExited) { throw "EXE exited during startup: $($process.ExitCode)" }
-            $runtime = $process.Modules | Where-Object ModuleName -eq 'coreclr.dll' | Select-Object -First 1
-            $process.Modules | Select-Object ModuleName, FileName | Format-Table -AutoSize | Out-String -Width 300 | Write-Output
+            # Single-file hosts can link CoreCLR into the EXE instead of loading coreclr.dll.
+            # Verify the loaded core library and application/native modules come from this bundle.
+            $runtime = $process.Modules | Where-Object ModuleName -eq 'System.Private.CoreLib.dll' | Select-Object -First 1
             if (-not $runtime -or -not $runtime.FileName.StartsWith($env:DOTNET_BUNDLE_EXTRACT_BASE_DIR, [StringComparison]::OrdinalIgnoreCase)) {
               throw 'EXE did not load its bundled .NET runtime'
+            }
+            foreach ($name in @('PCL.Launcher.dll', 'libSkiaSharp.dll', 'e_sqlite3.dll')) {
+              $module = $process.Modules | Where-Object ModuleName -eq $name | Select-Object -First 1
+              if (-not $module -or -not $module.FileName.StartsWith($env:DOTNET_BUNDLE_EXTRACT_BASE_DIR, [StringComparison]::OrdinalIgnoreCase)) {
+                throw "Required module was not loaded from the single EXE: $name"
+              }
             }
             $fatal = Get-ChildItem $smoke -Filter '*.log' -Recurse | Select-String -Pattern '\[FTL!\]|UNCAUGHT EXCEPTION|Unhandled exception'
             if ($fatal) { $fatal | Write-Output; throw 'Fatal startup error detected' }
@@ -121,7 +128,10 @@ jobs:
           } finally {
             if (-not $process.HasExited) { Stop-Process -Id $process.Id -Force }
             Get-Content "$smoke/stderr.log" -ErrorAction SilentlyContinue
-            Get-Content "$smoke/host-trace.log" -Tail 35 -ErrorAction SilentlyContinue
+            if ($Error.Count -gt 0) {
+              $process.Modules | Select-Object ModuleName, FileName | Format-Table -AutoSize | Out-String -Width 300 | Write-Output
+              Get-Content "$smoke/host-trace.log" -Tail 15 -ErrorAction SilentlyContinue | ForEach-Object { $_.Substring(0, [Math]::Min($_.Length, 500)) }
+            }
             Get-ChildItem "$smoke/data","$smoke/shared","$smoke/local","$smoke/temp" -Filter '*.log' -Recurse -ErrorAction SilentlyContinue | ForEach-Object {
               Write-Output $_.FullName
               Get-Content $_.FullName -Tail 25
