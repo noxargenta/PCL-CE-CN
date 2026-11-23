@@ -101,6 +101,8 @@ jobs:
           $env:DOTNET_ROOT_X64 = $env:DOTNET_ROOT
           $env:DOTNET_MULTILEVEL_LOOKUP = '0'
           $env:DOTNET_BUNDLE_EXTRACT_BASE_DIR = Join-Path $smoke 'bundle'
+          $env:DOTNET_HOST_TRACE = '1'
+          $env:DOTNET_HOST_TRACEFILE = Join-Path $smoke 'host-trace.log'
           $process = Start-Process -FilePath $exe -WorkingDirectory $smoke -WindowStyle Hidden -PassThru -RedirectStandardOutput "$smoke/stdout.log" -RedirectStandardError "$smoke/stderr.log"
           try {
             if (-not $process.WaitForInputIdle(45000)) { throw 'GUI did not become ready' }
@@ -108,6 +110,7 @@ jobs:
             $process.Refresh()
             if ($process.HasExited) { throw "EXE exited during startup: $($process.ExitCode)" }
             $runtime = $process.Modules | Where-Object ModuleName -eq 'coreclr.dll' | Select-Object -First 1
+            $process.Modules | Select-Object ModuleName, FileName | Format-Table -AutoSize | Out-String -Width 300 | Write-Output
             if (-not $runtime -or -not $runtime.FileName.StartsWith($env:DOTNET_BUNDLE_EXTRACT_BASE_DIR, [StringComparison]::OrdinalIgnoreCase)) {
               throw 'EXE did not load its bundled .NET runtime'
             }
@@ -118,9 +121,15 @@ jobs:
           } finally {
             if (-not $process.HasExited) { Stop-Process -Id $process.Id -Force }
             Get-Content "$smoke/stderr.log" -ErrorAction SilentlyContinue
+            Get-Content "$smoke/host-trace.log" -Tail 35 -ErrorAction SilentlyContinue
+            Get-ChildItem "$smoke/data","$smoke/shared","$smoke/local","$smoke/temp" -Filter '*.log' -Recurse -ErrorAction SilentlyContinue | ForEach-Object {
+              Write-Output $_.FullName
+              Get-Content $_.FullName -Tail 25
+            }
           }
 
       - name: Upload verified EXE
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: Windows-x64-EXE
