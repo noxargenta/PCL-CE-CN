@@ -13,20 +13,7 @@ public static class UpdateManager
     public static bool isUpdateWaitingRestart;
 
     public static UpdatesWrapperModel remoteServer = new(
-        new List<IUpdateSource>
-        {
-            new UpdatesMirrorChyanModel(),
-            new UpdatesRandomModel(
-            [
-                new UpdatesMinioModel("https://s3.pysio.online/pcl2-ce/", "Pysio"),
-                new UpdatesMinioModel(
-                    "https://staticassets.naids.com/resources/pclce/",
-                    "Naids")
-            ]),
-            new UpdatesMinioModel(
-                "https://github.com/PCL-Community/PCL2_CE_Server/raw/main/",
-                "GitHub")
-        });
+        [new UpdatesForkGitHubModel()]);
 
     public static Loading.LoaderCombo<JsonObject> updateLoader;
 
@@ -292,7 +279,7 @@ public static class UpdateManager
     internal static void DownloadLatestPcl(Loading.LoaderBase? loaderToSyncProgress = null)
     {
         // 注意：如果要自行实现这个功能，请换用另一个文件路径，以免与官方版本冲突
-        var latestPclPath = Path.Combine(LauncherPaths.Temp, "CE-Latest.exe");
+        var latestPclPath = Path.Combine(LauncherPaths.Temp, "CE-CN-Latest.exe");
         var target = remoteServer.GetLatestVersion(
             UpdateSourceChannel.Stable,
             SystemInfo.IsArm64System ? UpdateArch.Arm64 : UpdateArch.X64);
@@ -341,8 +328,7 @@ public static class UpdateManager
                 return;
             }
 
-            // macOS/Linux 当前只检测并提示；安装交给 DMG/Flatpak/发布页。
-            LauncherCommon.Log("[Update] 当前平台仅检查更新，不自动下载");
+            LauncherCommon.Log("[Update] 仅检查 CN 仓库发行版，安装通过本仓库发行页手动完成");
             UpdateStart(UpdateEnums.UpdateType.PromptOnly);
             return;
         }

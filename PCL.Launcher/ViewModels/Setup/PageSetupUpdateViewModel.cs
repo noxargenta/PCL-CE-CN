@@ -104,7 +104,7 @@ public partial class PageSetupUpdateViewModel : ViewModelBase
 
     public void Reload()
     {
-        CurrentVersionText = "PCL CE " + VersionNameFormat(LauncherCommon.VersionBaseName);
+        CurrentVersionText = "PCL CE CN " + VersionNameFormat(LauncherCommon.VersionBaseName);
         MirrorChyanKey = Config.Update.MirrorChyanKey;
         UpdateModeIndex = Math.Clamp((int)Config.Update.UpdateMode, 0, 3);
         SetUpdateButtonState(InstallButtonState);
@@ -121,6 +121,7 @@ public partial class PageSetupUpdateViewModel : ViewModelBase
         CheckAgainEnabled = false;
         try
         {
+            await Task.Run(() => UpdateManager.remoteServer.RefreshCache());
             var channel = UpdateManager.IsCurrentVersionBeta
                 ? UpdateSourceChannel.Beta
                 : UpdateSourceChannel.Stable;
@@ -139,7 +140,7 @@ public partial class PageSetupUpdateViewModel : ViewModelBase
             var version = await Task.Run(() =>
                 UpdateManager.remoteServer.GetLatestVersion(channel, arch));
             _latestVersion = version;
-            UpdateNameText = "PCL CE " + VersionNameFormat(version.VersionName);
+            UpdateNameText = "PCL CE CN " + VersionNameFormat(version.VersionName);
             _changelogSummary = ExtractSummary(version.Changelog);
             OnPropertyChanged(nameof(ChangelogText));
 
@@ -293,7 +294,7 @@ public partial class PageSetupUpdateViewModel : ViewModelBase
     public static void OpenReleasesPage()
     {
         Basics.OpenPath(
-            "https://github.com/noxargenta/PCL-CE-CN/releases/latest");
+            UpdatesForkGitHubModel.ReleasesUrl);
     }
 
     /// <summary>切换更新通道；返回 false 表示用户取消，调用方需要把下拉恢复原值。</summary>

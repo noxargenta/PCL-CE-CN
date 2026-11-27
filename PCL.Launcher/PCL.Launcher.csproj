@@ -16,10 +16,10 @@
         <Platforms>AnyCPU;x64;ARM64</Platforms>
         <PlatformTarget>$(Platform)</PlatformTarget>
         <NoWarn>$(NoWarn);CS9113</NoWarn>
-        <Version>2.15.1-cn.1</Version>
+        <Version>2.15.1-cn.2</Version>
         <AssemblyVersion>2.15.1.0</AssemblyVersion>
         <FileVersion>2.15.1.0</FileVersion>
-        <InformationalVersion>2.15.1-cn.1</InformationalVersion>
+        <InformationalVersion>2.15.1-cn.2</InformationalVersion>
         <ApplicationIcon>Assets/Images/icon.ico</ApplicationIcon>
         <ApplicationManifest>app.manifest</ApplicationManifest>
     </PropertyGroup>

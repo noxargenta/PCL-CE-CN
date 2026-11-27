@@ -52,17 +52,18 @@ jobs:
             throw 'Requested version does not match the application version'
           }
           "SOURCE_SHA=$(git rev-parse HEAD)" >> $env:GITHUB_ENV
-          "ASSET_NAME=PCL_CE_CN_$($env:VERSION)_windows_x64.exe" >> $env:GITHUB_ENV
+          $baseVersion = ($env:VERSION -split '-', 2)[0]
+          "ASSET_NAME=PCL_CE_CN_$baseVersion.exe" >> $env:GITHUB_ENV
 
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           dotnet-version: 11.0.x
 
-      - name: Test release region policy
+      - name: Test region policy and fork updates
         run: |
-          dotnet test PCL.Core.Test/PCL.Core.Test.csproj -c $env:CONFIGURATION -p:Platform=AnyCPU --filter FullyQualifiedName~RegionPolicyTest --nologo
-          if ($LASTEXITCODE -ne 0) { throw 'Region policy tests failed' }
+          dotnet test PCL.Core.Test/PCL.Core.Test.csproj -c $env:CONFIGURATION -p:Platform=AnyCPU --filter 'FullyQualifiedName~RegionPolicyTest|FullyQualifiedName~ForkGitHubUpdateTest' --nologo
+          if ($LASTEXITCODE -ne 0) { throw 'Region policy or fork update tests failed' }
 
       - name: Publish self-contained single EXE
         env:
