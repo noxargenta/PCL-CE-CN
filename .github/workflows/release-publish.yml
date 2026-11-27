@@ -159,11 +159,12 @@ jobs:
           }
           gh release upload $tag "dist/release/$env:ASSET_NAME" --clobber
           if ($LASTEXITCODE -ne 0) { throw 'EXE upload failed' }
-          $release = gh api "repos/$env:GH_REPO/releases/tags/$tag" | ConvertFrom-Json
+          $release = gh release view $tag --json assets | ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0) { throw 'Could not inspect release assets' }
           $exe = @($release.assets | Where-Object name -eq $env:ASSET_NAME)
           if ($exe.Count -ne 1 -or $exe[0].size -le 0) { throw 'Uploaded EXE is missing' }
           foreach ($asset in $release.assets | Where-Object name -ne $env:ASSET_NAME) {
-            gh api --method DELETE "repos/$env:GH_REPO/releases/assets/$($asset.id)"
+            gh release delete-asset $tag $asset.name --yes
             if ($LASTEXITCODE -ne 0) { throw "Could not remove old asset: $($asset.name)" }
           }
           $prerelease = if ($env:CONFIGURATION -eq 'Beta') { '--prerelease=true' } else { '--prerelease=false' }
